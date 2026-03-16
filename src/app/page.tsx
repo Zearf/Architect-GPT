@@ -24,7 +24,7 @@ export default function Home() {
           </nav>
 
           <div className="flex items-center gap-4">
-            <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="p-2 hover:bg-muted rounded-full transition-colors text-foreground/70">
+            <a href="https://github.com/Zearf/Architect-GPT" target="_blank" rel="noopener noreferrer" className="p-2 hover:bg-muted rounded-full transition-colors text-foreground/70">
               <Github size={20} />
             </a>
             <div className="h-6 w-px bg-border hidden sm:block"></div>

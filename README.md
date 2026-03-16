@@ -40,8 +40,8 @@ In the friction of feature requests and deadlines, the original architectural in
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/your-username/architect-gpt.git
-   cd architect-gpt
+   git clone https://github.com/Zearf/Architect-GPT.git
+   cd Architect-GPT
    ```
 
 2. Install dependencies:
