@@ -63,6 +63,20 @@ npm run dev
 
 The application will be available at `http://localhost:9002`.
 
+## 📦 Deployment
+
+### Firebase App Hosting (Recommended)
+This app is optimized for Firebase. To deploy:
+1. Connect your GitHub repository in the [Firebase Console](https://console.firebase.google.com/).
+2. Select **App Hosting** and follow the setup wizard.
+3. Add your `GOOGLE_GENAI_API_KEY` to the environment variables in the App Hosting settings.
+
+### Netlify
+1. Push your code to GitHub.
+2. Connect the repository to Netlify.
+3. Ensure the Build Command is `npm run build` and the Publish Directory is `.next`.
+4. Add `GOOGLE_GENAI_API_KEY` to your site's Environment Variables.
+
 ## 📂 Project Structure
 
 - `src/ai/`: Genkit configuration and AI flows.
