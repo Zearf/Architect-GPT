@@ -1,6 +1,7 @@
 import { CodebaseAnalyzer } from '@/components/CodebaseAnalyzer';
 import { Toaster } from '@/components/ui/toaster';
 import { Cpu, Github, Terminal, Info, Layout, ShieldCheck } from 'lucide-react';
+import Link from 'next/link';
 
 export default function Home() {
   return (
@@ -8,7 +9,7 @@ export default function Home() {
       {/* Header */}
       <header className="border-b border-border/50 bg-background/50 backdrop-blur-md sticky top-0 z-50">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3">
+          <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-background">
               <Cpu size={24} strokeWidth={2.5} />
             </div>
@@ -16,12 +17,10 @@ export default function Home() {
               <h1 className="text-xl font-headline font-bold leading-none">Architect GPT</h1>
               <p className="text-[10px] uppercase tracking-tighter text-muted-foreground font-code">Codebase Anthropologist v1.0</p>
             </div>
-          </div>
+          </Link>
           
           <nav className="hidden md:flex items-center gap-8">
-            <a href="#" className="text-sm font-medium text-foreground/70 hover:text-primary transition-colors">Framework</a>
-            <a href="#" className="text-sm font-medium text-foreground/70 hover:text-primary transition-colors">Manifesto</a>
-            <a href="#" className="text-sm font-medium text-foreground/70 hover:text-primary transition-colors">Documentation</a>
+            <Link href="/about" className="text-sm font-medium text-foreground/70 hover:text-primary transition-colors">About</Link>
           </nav>
 
           <div className="flex items-center gap-4">
