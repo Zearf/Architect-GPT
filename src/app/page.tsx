@@ -1,6 +1,6 @@
 import { CodebaseAnalyzer } from '@/components/CodebaseAnalyzer';
 import { Toaster } from '@/components/ui/toaster';
-import { Cpu, Github, Terminal, Info, Layout } from 'lucide-react';
+import { Cpu, Github, Terminal, Info, Layout, ShieldCheck } from 'lucide-react';
 
 export default function Home() {
   return (
@@ -81,11 +81,11 @@ export default function Home() {
           </div>
           <div className="space-y-4">
             <div className="w-12 h-12 rounded-lg bg-card border border-border flex items-center justify-center text-accent">
-              <Github size={24} />
+              <ShieldCheck size={24} />
             </div>
-            <h3 className="text-xl font-headline">Anti-Slop Audit</h3>
+            <h3 className="text-xl font-headline">Architectural Health Audit</h3>
             <p className="text-muted-foreground text-sm leading-relaxed">
-              Identifying technical debt, broken modularity, and areas where automation could improve the system's overall architectural integrity.
+              Identifying technical debt, architectural risks, and areas where automation could improve the system's overall integrity.
             </p>
           </div>
         </section>

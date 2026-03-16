@@ -38,7 +38,7 @@ const AnalysisResultSchema = z.object({
     .describe(
       'An explanation of one complex logic flow (e.g., how an Exception travels through the middleware).'
     ),
-  antiSlopAudit: z
+  architecturalHealthAudit: z
     .array(z.string())
     .describe(
       'Identify three areas where the code could be more modular or automated, acting as "Risk Mitigation" tasks.'
@@ -61,7 +61,7 @@ const analyzeCodebasePrompt = ai.definePrompt({
   output: { schema: AnalysisResultSchema },
   prompt: `As "The Codebase Anthropologist", your mission is to perform a deep-tissue analysis of the provided software project to uncover its "Semantic Intent." You will not simply summarize code; you will explain the architectural philosophy, state management, and modular boundaries that a standard LLM summary would miss.
 
-Core Principles (Anti-AI-Slop Manifesto):
+Core Principles:
 - Zero Redundancy: Never say "This function is used to..." or "This class defines..." Assume the reader can read the provided code.
 - Semantic Focus: Explain why a specific design pattern was chosen (e.g., "Uses a Registry pattern to decouple Agent tools from the Logic Loop").
 - High-Density Information: Prioritize "Systems Thinking." Map out how data flows across module boundaries.
@@ -118,8 +118,8 @@ ${analysisResult.modularBlueprint
 ## The Reasoning Trace
 ${analysisResult.reasoningTrace}
 
-## Anti-Slop Audit
-${analysisResult.antiSlopAudit.map((item) => `- ${item}`).join('\n')}
+## Architectural Health Audit
+${analysisResult.architecturalHealthAudit.map((item) => `- ${item}`).join('\n')}
 `;
 
     return markdownOutput;
