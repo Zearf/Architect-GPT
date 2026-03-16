@@ -101,7 +101,7 @@ export default function Home() {
           </div>
           
           <div className="text-xs font-code text-muted-foreground">
-            &copy; {new Date().getFullYear()} Principia Architecture. Distributed Ledger of Semantic Intent.
+            &copy; {new Date().getFullYear()} Principia Architecture.
           </div>
 
           <div className="flex gap-6 text-xs font-medium text-muted-foreground">
