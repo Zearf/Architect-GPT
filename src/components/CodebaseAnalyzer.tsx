@@ -1,29 +1,30 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { analyzeCodebase } from '@/app/actions';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { FileCode, Search, Cpu, Download, Layers, ShieldCheck, Terminal, Braces, AlignLeft } from 'lucide-react';
+import { FileCode, Search, Cpu, Download, Layers, ShieldCheck, Terminal, AlignLeft, Upload, FilePlus, X } from 'lucide-react';
 import { ArchitectureDocument } from './ArchitectureDocument';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 export function CodebaseAnalyzer() {
   const [input, setInput] = useState('');
-  const [inputType, setInputType] = useState<'json' | 'text'>('text');
+  const [inputType, setInputType] = useState<'text' | 'upload'>('text');
+  const [uploadedFiles, setUploadedFiles] = useState<{ filePath: string; content: string }[]>([]);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [result, setResult] = useState<string | null>(null);
   const [progress, setProgress] = useState(0);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
   const parseRawText = (text: string) => {
     const files: { filePath: string; content: string }[] = [];
     const sections = text.split(/^--- (.*?) ---$/m);
     
-    // The first element might be empty if it starts with a separator
     for (let i = 1; i < sections.length; i += 2) {
       const filePath = sections[i].trim();
       const content = sections[i + 1]?.trim();
@@ -34,36 +35,62 @@ export function CodebaseAnalyzer() {
     return files;
   };
 
-  const handleAnalyze = async () => {
-    if (!input.trim()) {
-      toast({
-        title: "Empty Input",
-        description: `Please provide your codebase ${inputType === 'json' ? 'JSON' : 'text'}.`,
-        variant: "destructive"
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    const newFiles: { filePath: string; content: string }[] = [];
+    
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const content = await file.text();
+      newFiles.push({
+        filePath: file.name,
+        content: content
       });
-      return;
     }
 
+    setUploadedFiles(prev => [...prev, ...newFiles]);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const removeFile = (index: number) => {
+    setUploadedFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleAnalyze = async () => {
     try {
-      let codebase: any[];
+      let codebase: { filePath: string; content: string }[] = [];
       
-      if (inputType === 'json') {
-        codebase = JSON.parse(input);
-        if (!Array.isArray(codebase)) {
-          throw new Error("Input must be an array of {filePath, content}");
+      if (inputType === 'text') {
+        if (!input.trim()) {
+          toast({
+            title: "Empty Input",
+            description: "Please provide your codebase text.",
+            variant: "destructive"
+          });
+          return;
         }
-      } else {
         codebase = parseRawText(input);
         if (codebase.length === 0) {
           throw new Error("No files found. Ensure you use the '--- path/to/file ---' separator format.");
         }
+      } else {
+        if (uploadedFiles.length === 0) {
+          toast({
+            title: "No Files",
+            description: "Please upload at least one code file.",
+            variant: "destructive"
+          });
+          return;
+        }
+        codebase = uploadedFiles;
       }
       
       setIsAnalyzing(true);
       setResult(null);
       setProgress(10);
       
-      // Artificial progress for better UX
       const interval = setInterval(() => {
         setProgress(prev => {
           if (prev >= 90) {
@@ -94,8 +121,8 @@ export function CodebaseAnalyzer() {
       }
     } catch (e: any) {
       toast({
-        title: "Invalid Format",
-        description: e.message || "Parsing failed. Please check your input format.",
+        title: "Error",
+        description: e.message || "Parsing failed. Please check your input.",
         variant: "destructive"
       });
     } finally {
@@ -117,20 +144,7 @@ export function CodebaseAnalyzer() {
   };
 
   const loadExample = () => {
-    if (inputType === 'json') {
-      const example = [
-        {
-          filePath: "main.py",
-          content: "def main():\n    print('Hello World')\n    runner = TaskRunner()\n    runner.run()"
-        },
-        {
-          filePath: "runner.py",
-          content: "class TaskRunner:\n    def run(self):\n        pass"
-        }
-      ];
-      setInput(JSON.stringify(example, null, 2));
-    } else {
-      const example = `--- main.py ---
+    const example = `--- main.py ---
 def main():
     print('Hello World')
     runner = TaskRunner()
@@ -140,8 +154,8 @@ def main():
 class TaskRunner:
     def run(self):
         pass`;
-      setInput(example);
-    }
+    setInput(example);
+    setInputType('text');
   };
 
   return (
@@ -157,19 +171,19 @@ class TaskRunner:
             </div>
             <CardTitle className="text-2xl font-headline mt-2">Codebase Analysis</CardTitle>
             <CardDescription className="text-muted-foreground">
-              Paste your codebase below to begin the architectural decomposition.
+              Provide your codebase via text markers or direct file upload.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <Tabs value={inputType} onValueChange={(v) => { setInputType(v as any); setInput(''); }} className="w-full">
+            <Tabs value={inputType} onValueChange={(v) => { setInputType(v as any); }} className="w-full">
               <TabsList className="grid w-full grid-cols-2 mb-4 bg-background/30">
                 <TabsTrigger value="text" className="flex items-center gap-2">
                   <AlignLeft size={14} />
                   Raw Text
                 </TabsTrigger>
-                <TabsTrigger value="json" className="flex items-center gap-2">
-                  <Braces size={14} />
-                  JSON Payload
+                <TabsTrigger value="upload" className="flex items-center gap-2">
+                  <Upload size={14} />
+                  File Upload
                 </TabsTrigger>
               </TabsList>
               
@@ -177,7 +191,7 @@ class TaskRunner:
                 <div className="relative group">
                   <Textarea
                     placeholder={"--- src/app.py ---\ncode here...\n\n--- src/utils.py ---\nmore code..."}
-                    className="min-h-[400px] font-code text-sm bg-background/50 border-border group-focus-within:border-primary/50 transition-colors"
+                    className="min-h-[300px] font-code text-sm bg-background/50 border-border group-focus-within:border-primary/50 transition-colors"
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                   />
@@ -189,17 +203,35 @@ class TaskRunner:
                 </div>
               </TabsContent>
               
-              <TabsContent value="json" className="mt-0">
-                <div className="relative group">
-                  <Textarea
-                    placeholder='[{"filePath": "src/app.py", "content": "..."}]'
-                    className="min-h-[400px] font-code text-sm bg-background/50 border-border group-focus-within:border-primary/50 transition-colors"
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                  />
-                  {!input && (
-                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-10">
-                      <Braces size={48} />
+              <TabsContent value="upload" className="mt-0">
+                <div className="space-y-4">
+                  <div 
+                    onClick={() => fileInputRef.current?.click()}
+                    className="border-2 border-dashed border-border/50 rounded-lg p-8 text-center hover:border-primary/50 transition-colors cursor-pointer bg-background/20"
+                  >
+                    <input 
+                      type="file" 
+                      multiple 
+                      className="hidden" 
+                      ref={fileInputRef} 
+                      onChange={handleFileChange}
+                    />
+                    <FilePlus size={32} className="mx-auto mb-2 text-muted-foreground" />
+                    <p className="text-sm font-medium">Click to select multiple files</p>
+                    <p className="text-xs text-muted-foreground mt-1">Upload .ts, .js, .py, etc.</p>
+                  </div>
+
+                  {uploadedFiles.length > 0 && (
+                    <div className="space-y-2 max-h-[200px] overflow-y-auto pr-2">
+                      <p className="text-xs font-code uppercase tracking-wider text-muted-foreground">Staged Files ({uploadedFiles.length})</p>
+                      {uploadedFiles.map((file, idx) => (
+                        <div key={idx} className="flex items-center justify-between p-2 rounded bg-muted/30 border border-border/50 text-xs font-code">
+                          <span className="truncate flex-1 mr-2">{file.filePath}</span>
+                          <button onClick={() => removeFile(idx)} className="text-muted-foreground hover:text-destructive">
+                            <X size={14} />
+                          </button>
+                        </div>
+                      ))}
                     </div>
                   )}
                 </div>
@@ -291,7 +323,7 @@ class TaskRunner:
             <h3 className="text-xl font-headline mb-2">Awaiting Codebase Input</h3>
             <p className="max-w-md mx-auto text-sm">
               The Principal Architect is ready to uncover the semantic intent of your system. 
-              Provide your code context on the left using the raw text or JSON format.
+              Paste code text or upload files on the left to begin.
             </p>
             <div className="mt-8 flex items-center gap-2 text-xs uppercase tracking-widest text-primary/60">
               <Search size={14} />
